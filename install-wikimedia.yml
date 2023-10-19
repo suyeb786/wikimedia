@@ -1,0 +1,73 @@
+---
+- name: Install Wikimedia
+  hosts: localhost
+  vars_files:
+    - secret.yml
+  become: yes
+  tasks:
+    - name: Update Yum package cache (CentOS)
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install required packages (CentOS)
+      yum:
+        name:
+          - httpd
+          - php
+          - php-mysql
+          - php-xml
+          - mariadb-server
+        state: present
+      become: yes
+
+    - name: Start and enable MariaDB
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+    - name: Configure Apache for Wikimedia
+      template:
+        src: apache-config.conf
+        dest: /etc/httpd/conf.d/wikimedia.conf
+      notify:
+        - Reload Apache
+
+    - name: Reload Apache
+      service:
+        name: httpd
+        state: reloaded
+
+    - name: Download Wikimedia
+      get_url:
+        url: https://releases.wikimedia.org/mediawiki/1.40/mediawiki-1.40.1.tar.gz
+        dest: /var/www/html/mediawiki.tar.gz
+
+    - name: Extract Wikimedia
+      unarchive:
+        src: /var/www/html/mediawiki.tar.gz
+        dest: /var/www/html/
+        remote_src: yes
+      notify:
+        - Set Wikimedia permissions
+
+    - name: Change ownership of a directory
+      file:
+        path: /var/www/html/mediawiki
+        owner: root
+        group: root
+        state: directory
+
+  handlers:
+  - name: Reload Apache
+    service:
+      name: httpd
+      state: reloaded
+
+  - name: Set Wikimedia permissions
+    file:
+      path: /var/www/html/mediawiki
+      owner: root
+      group: root
+      recurse: yes
