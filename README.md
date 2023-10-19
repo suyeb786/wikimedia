@@ -1,5 +1,5 @@
 # wikimedia
-Install and configure mediawiki on your system.
+Install and configure  MediaWiki on CentOS system.
 
 
 
@@ -8,7 +8,7 @@ Install and configure mediawiki on your system.
 2. Operating System: CentOS-7
 3. Containerization Tool: Docker or any(ex. LXC, RCT)
 
-Note: Following steps are documented based on setup I have conifigured on my local machine due to full fledge environment unavailablity and setups are enough for understanding and learning purpose.
+Note: Following steps are documented based on setup I have configured on my local machine due to full fledge environment unavailability and setups are enough for understanding and learning purpose.
 
 ### Steps
 1. Install VirtualBox and deploy CentOS-7 VM on VirtualBox hypervisor
@@ -43,3 +43,18 @@ systemctl status mariadb
 ![image](https://github.com/suyeb786/wikimedia/assets/17975259/e22f6667-5245-4b6b-9af0-4646c38993fb)
 
 ![image](https://github.com/suyeb786/wikimedia/assets/17975259/dfe020e7-a497-4ab0-ac4f-32cc64ff882f)
+
+
+### Additional Configuration 
+For storing any secret instead of ansible vault using any vault like HashiCorp is more safe and recommended.
+```
+ansible-vault encrypt secrets.yml
+
+ansible-playbook wiki-media.yml --ask-vault-pass
+```
+
+For avoiding anisble vault prompt we can also use environment variable
+```
+export ANSIBLE_VAULT_PASSWORD_FILE=<vault password>
+ansible-playbook wiki-media.yml
+```
